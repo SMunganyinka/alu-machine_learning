@@ -66,3 +66,4 @@ fig.suptitle("All in One", fontsize="x-small")
 
 plt.tight_layout()
 plt.show()
+
