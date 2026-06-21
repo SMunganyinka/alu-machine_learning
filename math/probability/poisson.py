@@ -13,23 +13,34 @@ class Poisson:
         """
         Initialize Poisson distribution
         """
-        if data is None:
-            if lambtha <= 0:
-                raise ValueError("lambtha must be a positive value")
-            self.lambtha = float(lambtha)
 
-        else:
+        # If data is given
+        if data is not None:
+
             if not isinstance(data, list):
                 raise TypeError("data must be a list")
+
             if len(data) < 2:
                 raise ValueError("data must contain multiple values")
 
             self.lambtha = float(sum(data) / len(data))
 
+        # If no data is given
+        else:
+
+            if not isinstance(lambtha, (int, float)):
+                raise TypeError("lambtha must be a positive value")
+
+            if lambtha <= 0:
+                raise ValueError("lambtha must be a positive value")
+
+            self.lambtha = float(lambtha)
+
     def pmf(self, k):
         """
         Calculates the value of the PMF for a given k
         """
+
         if not isinstance(k, int):
             k = int(k)
 
@@ -49,6 +60,7 @@ class Poisson:
         """
         Calculates the value of the CDF for a given k
         """
+
         if not isinstance(k, int):
             k = int(k)
 
@@ -60,7 +72,6 @@ class Poisson:
 
         for i in range(k + 1):
             factorial = 1
-
             for j in range(1, i + 1):
                 factorial *= j
 
