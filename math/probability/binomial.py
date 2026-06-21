@@ -1,128 +1,78 @@
 #!/usr/bin/env python3
-""" defines Normal class that represents normal distribution """
 
 
-class Normal:
-    """
-    class that represents normal distribution
+"""Binomial class module for Binomial distribution calculations """
 
-    class constructor:
-        def __init__(self, data=None, mean=0., stddev=1.)
 
-    instance attributes:
-        mean [float]: the mean of the distribution
-        stddev [float]: the standard deviation of the distribution
+class Binomial:
+    """Binomial class"""
 
-    instance methods:
-        def z_score(self, x): calculates the z-score of a given x-value
-        def x_value(self, z): calculates the x-value of a given z-score
-        def pdf(self, x): calculates PDF for given x-value
-        def cdf(self, x): calculates CDF for given x-value
-    """
+    def __init__(self, data=None, n=1, p=0.5):
+        """_summary_
 
-    def __init__(self, data=None, mean=0., stddev=1.):
-        """
-        class constructor
+        Args:
+            data (_type_, optional): _description_. Defaults to None.
+            n (int, optional): _description_. Defaults to 1.
+            p (float, optional): _description_. Defaults to 0.5.
 
-        parameters:
-            data [list]: data to be used to estimate the distibution
-            mean [float]: the mean of the distribution
-            stddev [float]: the standard deviation of the distribution
-
-        Sets the instance attributes mean and stddev as floats
-        If data is not given:
-            Use the given mean and stddev
-            raise ValueError if stddev is not positive value
-        If data is given:
-            Calculate the mean and stddev of data
-            Raise TypeError if data is not a list
-            Raise ValueError if data does not contain at least two data points
+        Raises:
+            ValueError: _description_
+            ValueError: _description_
+            TypeError: _description_
+            ValueError: _description_
         """
         if data is None:
-            if stddev < 1:
-                raise ValueError("stddev must be a positive value")
-            else:
-                self.stddev = float(stddev)
-                self.mean = float(mean)
+            if n <= 0:
+                raise ValueError("n must be a positive value")
+            if p <= 0 or p >= 1:
+                raise ValueError("p must be greater than 0 and less than 1")
+            self.n = int(n)
+            self.p = float(p)
         else:
-            if not isinstance(data, list):
+            if type(data) != list:
                 raise TypeError("data must be a list")
-            elif len(data) < 2:
+            if len(data) < 2:
                 raise ValueError("data must contain multiple values")
-            else:
-                mean = float(sum(data) / len(data))
-                self.mean = mean
-                summation = 0
-                for x in data:
-                    summation += ((x - mean) ** 2)
-                stddev = (summation / len(data)) ** (1 / 2)
-                self.stddev = stddev
+            mean = float(sum(data) / len(data))
+            var = float((sum(map(lambda n: pow(n - mean,
+                        2), data)) / len(data)))
+            self.p = - (var / mean) + 1
+            self.n = round(mean / self.p)
+            self.p = mean / self.n
 
-    def z_score(self, x):
+    def factorial(self, k):
+        """ Find factorial of a number """
+        result = 1
+        for i in range(1, k+1):
+            result *= i
+        return result
+
+    def pmf(self, k):
+        """ Calculates the value of the PMF for a given number of "successes."
+
+        Args:
+            k (int): number of "successes"
         """
-        calculates the z-score of a given x-value
+        if not isinstance(k, int):
+            k = int(k)
+        if k < 0:
+            return 0
 
-        parameters:
-            x: x-value
+        n_fact = self.factorial(self.n)
+        k_fact = self.factorial(k)
+        n_k_fact = self.factorial(self.n - k)
+        return (n_fact / (k_fact * n_k_fact)) * \
+            (self.p ** k) * ((1 - self.p) ** (self.n - k))
 
-        return:
-            z-score of x
+    def cdf(self, k):
+        """Calculates the value of the CDF for a given number of "successes."
+
+        Args:
+            k (int): is the number of successes.
         """
-        mean = self.mean
-        stddev = self.stddev
-        z = (x - mean) / stddev
-        return z
 
-    def x_value(self, z):
-        """
-        calculates the x-value of a given z-score
-
-        parameters:
-            z: z-score
-
-        return:
-            x-value of z
-        """
-        mean = self.mean
-        stddev = self.stddev
-        x = (z * stddev) + mean
-        return x
-
-    def pdf(self, x):
-        """
-        calculates the value of the PDF for a given x-value
-
-        parameters:
-            x: x-value
-
-        return:
-            the PDF value for x
-        """
-        mean = self.mean
-        stddev = self.stddev
-        e = 2.7182818285
-        pi = 3.1415926536
-        power = -0.5 * (self.z_score(x) ** 2)
-        coefficient = 1 / (stddev * ((2 * pi) ** (1 / 2)))
-        pdf = coefficient * (e ** power)
-        return pdf
-
-    def cdf(self, x):
-        """
-        calculates the value of the CDF for a given x-value
-
-        parameters:
-            x: x-value
-
-        return:
-            the CDF value for x
-        """
-        mean = self.mean
-        stddev = self.stddev
-        pi = 3.1415926536
-        value = (x - mean) / (stddev * (2 ** (1 / 2)))
-        erf = value - ((value ** 3) / 3) + ((value ** 5) / 10)
-        erf = erf - ((value ** 7) / 42) + ((value ** 9) / 216)
-        erf *= (2 / (pi ** (1 / 2)))
-        cdf = (1 / 2) * (1 + erf)
-        return cdf
+        if not isinstance(k, int):
+            k = int(k)
+        if k < 0:
+            return 0
+        return sum([self.pmf(i) for i in range(0, k+1)])
